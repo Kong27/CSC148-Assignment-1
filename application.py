@@ -112,7 +112,6 @@ def process_event_history(log: Dict[str, List[Dict]],
     handout.
     - The <customer_list> already contains all the customers from the <log>.
     """
-    # TODO: Implement this method. We are giving you the first few lines of code
     billing_date = datetime.datetime.strptime(log['events'][0]['time'],
                                               "%Y-%m-%d %H:%M:%S")
     billing_month = billing_date.month
@@ -131,12 +130,16 @@ def process_event_history(log: Dict[str, List[Dict]],
         if event_data['type'] == "call":
             src_customer = find_customer_by_number(event_data['src_number'],
                                                    customer_list)
-            src_customer.make_call()
+
             dst_customer = find_customer_by_number(event_data['dst_number'],
                                                    customer_list)
+
             new_call = Call(event_data['src_number'], event_data['dst_number'],
                             event_data['time'], event_data['duration'],
                             event_data['src_loc'], event_data['dst_loc'])
+
+            src_customer.make_call(new_call)
+            dst_customer.receive_call(new_call)
 
 
 if __name__ == '__main__':
