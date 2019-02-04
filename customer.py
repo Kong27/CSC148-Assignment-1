@@ -62,7 +62,6 @@ class Customer:
         Precondition: The phone line associated with the destination phone
         number of <call>, is owned by this customer
         """
-        # TODO: Implement this method
         for line in self._phone_lines:
             if call.dst_number == line.number:
                 line.make_call(call)
