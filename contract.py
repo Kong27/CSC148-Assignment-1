@@ -88,6 +88,25 @@ class Contract:
 
 
 # TODO: Implement the MTMContract, TermContract, and PrepaidContract
+class MTMContract(Contract):
+
+    def __init__(self, start: datetime.date) -> None:
+        Contract.__init__(self, start)
+
+
+class TermContract(Contract):
+
+    def __init__(self, start: datetime.date) -> None:
+        Contract.__init__(self, start)
+
+    def new_month(self, month: int, year: int, bill: Bill):
+        pass
+
+
+class PrepaidContract(Contract):
+
+    def __init__(self, start: datetime.date) -> None:
+        Contract.__init__(self, start)
 
 
 if __name__ == '__main__':
