@@ -106,7 +106,6 @@ class TermContract(Contract):
     def new_month(self, month: int, year: int, bill: Bill):
         bill.set_rates("TERM", TERM_MINS_COST)
         bill.add_fixed_cost(TERM_MONTHLY_FEE)
-        bill.add_free_minutes(TERM_MINS)
 
 
 class PrepaidContract(Contract):
