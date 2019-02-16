@@ -93,6 +93,10 @@ class MTMContract(Contract):
     def __init__(self, start: datetime.date) -> None:
         Contract.__init__(self, start)
 
+    def new_month(self, month: int, year: int, bill: Bill):
+        bill.set_rates("MTM", MTM_MINS_COST)
+        bill.add_fixed_cost(MTM_MONTHLY_FEE)
+
 
 class TermContract(Contract):
 
@@ -100,13 +104,18 @@ class TermContract(Contract):
         Contract.__init__(self, start)
 
     def new_month(self, month: int, year: int, bill: Bill):
-        pass
+        bill.set_rates("TERM", TERM_MINS_COST)
+        bill.add_fixed_cost(TERM_MONTHLY_FEE)
+        bill.add_free_minutes(TERM_MINS)
 
 
 class PrepaidContract(Contract):
 
     def __init__(self, start: datetime.date) -> None:
         Contract.__init__(self, start)
+
+    def new_month(self, month: int, year: int, bill: Bill):
+        bill.set_rates("PREPAID", PREPAID_MINS_COST)
 
 
 if __name__ == '__main__':
