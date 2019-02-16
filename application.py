@@ -18,6 +18,7 @@ from visualizer import Visualizer
 from customer import Customer
 from phoneline import PhoneLine
 from call import Call
+from contract import MTMContract, TermContract, PrepaidContract
 
 
 def import_data() -> Dict[str, List[Dict]]:
@@ -46,12 +47,7 @@ def create_customers(log: Dict[str, List[Dict]]) -> List[Customer]:
         customer = Customer(cust['id'])
         for line in cust['lines']:
             contract = None
-            # TODO:
-            # 1) Uncomment the piece of code below once you've implemented
-            #    all types of contracts.
-            # 2) Make sure to import the necessary contract classes in this file
-            # 3) Remove this TODO list when you're done.
-            """
+
             if line['contract'] == 'prepaid':
                 # start with $100 credit on the account
                 contract = PrepaidContract(datetime.date(2017, 12, 25), 100)
@@ -62,7 +58,6 @@ def create_customers(log: Dict[str, List[Dict]]) -> List[Customer]:
                                         datetime.date(2019, 6, 25))
             else:
                 print("ERROR: unknown contract type")
-            """
 
             line = PhoneLine(line['number'], contract)
             customer.add_phone_line(line)
