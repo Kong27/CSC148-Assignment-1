@@ -95,9 +95,13 @@ class MTMContract(Contract):
     def new_month(self, month: int, year: int, bill: Bill):
         bill.set_rates("MTM", MTM_MINS_COST)
         bill.add_fixed_cost(MTM_MONTHLY_FEE)
+        self.bill = bill
 
     def bill_call(self, call: Call) -> None:
         self.bill.add_billed_minutes(call.duration)
+
+    def cancel_contract(self) -> float:
+        return self.bill.get_cost()
 
 
 class TermContract(Contract):
@@ -107,11 +111,17 @@ class TermContract(Contract):
         self.end = end
 
     def new_month(self, month: int, year: int, bill: Bill):
+        """
+        Sets bill values according to the parameters of the term contract. If
+        it is the first month of the contract, a fixed cost is added in the form
+        of the term deposit.
+        """
         bill.set_rates("TERM", TERM_MINS_COST)
         bill.add_fixed_cost(TERM_MONTHLY_FEE)
         # if a given month and year matches the start then it is the 1st month
         if month == self.start.month and year == self.start.year:
             bill.add_fixed_cost(TERM_DEPOSIT)
+        self.bill = bill
 
     def bill_call(self, call: Call) -> None:
         """
@@ -132,6 +142,9 @@ class TermContract(Contract):
             self.bill.add_free_minutes(TERM_MINS - self.bill.free_min)
             self.bill.add_billed_minutes(remain)
 
+    def cancel_contract(self) -> float:
+        pass
+
 
 class PrepaidContract(Contract):
 
@@ -141,9 +154,13 @@ class PrepaidContract(Contract):
 
     def new_month(self, month: int, year: int, bill: Bill):
         bill.set_rates("PREPAID", PREPAID_MINS_COST)
+        self.bill = bill
 
     def bill_call(self, call: Call) -> None:
         self.bill.add_billed_minutes(call.duration)
+
+    def cancel_contract(self) -> float:
+        pass
 
 
 if __name__ == '__main__':
