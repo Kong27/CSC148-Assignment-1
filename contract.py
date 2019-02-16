@@ -109,6 +109,9 @@ class TermContract(Contract):
         bill.set_rates("TERM", TERM_MINS_COST)
         bill.add_fixed_cost(TERM_MONTHLY_FEE)
 
+        if month == self.start.month and year == self.start.year:
+            bill.add_fixed_cost(TERM_DEPOSIT)
+
     def bill_call(self, call: Call) -> None:
         """
         Adds billed minutes to the call iff the customer has used up all of the
