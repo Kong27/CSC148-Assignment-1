@@ -87,7 +87,6 @@ class Contract:
         return self.bill.get_cost()
 
 
-# TODO: Implement the MTMContract, TermContract, and PrepaidContract
 class MTMContract(Contract):
 
     def __init__(self, start: datetime.date) -> None:
@@ -110,17 +109,20 @@ class TermContract(Contract):
         bill.set_rates("TERM", TERM_MINS_COST)
         bill.add_fixed_cost(TERM_MONTHLY_FEE)
 
-    def bill_call(self, call: Call):
+    def bill_call(self, call: Call) -> None:
         """
         Adds billed minutes to the call iff the customer has used up all of the
         free minutes within the month. If the call goes over the free minute
         threshold, free minutes are used up and the remainder is carried over to
         be billed.
         """
+        # free minutes left can cover all of the call
         if self.bill.free_min <= (TERM_MINS - call.duration):
             self.bill.add_free_minutes(call.duration)
+        # no free minutes left
         elif self.bill.free_min >= TERM_MINS:
             self.bill.add_free_minutes(call.duration)
+        # free minutes only cover some of the call
         else:
             remain = call.duration - (TERM_MINS - self.bill.free_min)
             self.bill.add_free_minutes(TERM_MINS - self.bill.free_min)
