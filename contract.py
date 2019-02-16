@@ -102,13 +102,14 @@ class MTMContract(Contract):
 
 class TermContract(Contract):
 
-    def __init__(self, start: datetime.date) -> None:
+    def __init__(self, start: datetime.date, end: datetime.date) -> None:
         Contract.__init__(self, start)
+        self.end = end
 
     def new_month(self, month: int, year: int, bill: Bill):
         bill.set_rates("TERM", TERM_MINS_COST)
         bill.add_fixed_cost(TERM_MONTHLY_FEE)
-
+        # if a given month and year matches the start then it is the 1st month
         if month == self.start.month and year == self.start.year:
             bill.add_fixed_cost(TERM_DEPOSIT)
 
@@ -134,8 +135,9 @@ class TermContract(Contract):
 
 class PrepaidContract(Contract):
 
-    def __init__(self, start: datetime.date) -> None:
+    def __init__(self, start: datetime.date, balance: float) -> None:
         Contract.__init__(self, start)
+        self.balance = balance
 
     def new_month(self, month: int, year: int, bill: Bill):
         bill.set_rates("PREPAID", PREPAID_MINS_COST)
