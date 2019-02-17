@@ -115,6 +115,8 @@ class TermContract(Contract):
         """ Create a new Term Contract with the <start> date, and <end> date."""
         Contract.__init__(self, start)
         self.end = end
+        self.current_month = start.month
+        self.current_year = start.year
 
     def new_month(self, month: int, year: int, bill: Bill):
         """
@@ -128,6 +130,8 @@ class TermContract(Contract):
         if month == self.start.month and year == self.start.year:
             bill.add_fixed_cost(TERM_DEPOSIT)
         self.bill = bill
+        self.current_month = month
+        self.current_year = year
 
     def bill_call(self, call: Call) -> None:
         """
@@ -150,15 +154,17 @@ class TermContract(Contract):
             self.bill.add_billed_minutes(remain)
 
     def cancel_contract(self) -> float:
-        """ Return the amount owed in order to close the phone line associated
-        with this contract.
+        """
+        Return the amount owed in order to close the phone line associated
+        with this contract. A negative value indicates credit since the term
+        deposit is refunded.
         """
         self.start = None
-        now = datetime.datetime.now()
-        if now < self.end:
-            return self.bill.get_cost() + TERM_DEPOSIT
+        if self.current_year >= self.end.year:
+            if self.current_month >= self.end.month:
+                return self.bill.get_cost() - TERM_DEPOSIT
         else:
-            return self.bill.get_cost() - TERM_DEPOSIT
+            return self.bill.get_cost()
 
 
 class PrepaidContract(Contract):
