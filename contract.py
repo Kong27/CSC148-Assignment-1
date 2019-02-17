@@ -83,8 +83,7 @@ class Contract:
         is being cancelled. In other words, you can safely assume that self.bill
         exists for the right month+year when the cancelation is requested.
         """
-        self.start = None
-        return self.bill.get_cost()
+        raise NotImplementedError
 
 
 class MTMContract(Contract):
@@ -101,6 +100,7 @@ class MTMContract(Contract):
         self.bill.add_billed_minutes(call.duration)
 
     def cancel_contract(self) -> float:
+        self.start = None
         return self.bill.get_cost()
 
 
@@ -143,6 +143,7 @@ class TermContract(Contract):
             self.bill.add_billed_minutes(remain)
 
     def cancel_contract(self) -> float:
+        self.start = None
         pass
 
 
@@ -150,17 +151,26 @@ class PrepaidContract(Contract):
 
     def __init__(self, start: datetime.date, balance: float) -> None:
         Contract.__init__(self, start)
-        self.balance = balance
+        self.balance = -balance
 
     def new_month(self, month: int, year: int, bill: Bill):
+        """
+        Balances carried over between months via attribute. If there is less
+        than a $10 credit (more than negative 10), then an automatic top-up of
+        $25 is applied to the bill.
+        """
         bill.set_rates("PREPAID", PREPAID_MINS_COST)
         self.bill = bill
+        if self.balance > -10:
+            self.bill.add_fixed_cost(25)
+            self.balance -= 25
 
     def bill_call(self, call: Call) -> None:
         self.bill.add_billed_minutes(call.duration)
 
     def cancel_contract(self) -> float:
-        pass
+        self.start = None
+        return self.bill.get_cost()
 
 
 if __name__ == '__main__':
