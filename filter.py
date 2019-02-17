@@ -145,14 +145,25 @@ class DurationFilter(Filter):
         - If the filter string is invalid, your code must not crash, as
         specified in the handout.
         """
-        call_lst = []
+                call_lst = []
         try:
-            for call in data:
-                if int(filter_string) == call.duration:
-                    call_lst.append(data[data.index(call)])
+            if filter_string[0] == 'L':
+                for call in data:
+                    if int(filter_string[1:]) < call.duration:
+                        call_lst.append(data[data.index(call)])
+            elif filter_string[0] == 'G':
+                for call in data:
+                    if int(filter_string[1:]) > call.duration:
+                        call_lst.append(data[data.index(call)])
+            else:
+                return data
             if call_lst is None:
                 raise ValueError
         except ValueError:
+            return data
+        except IndexError:
+            return data
+        except AttributeError:
             return data
         return call_lst
 
