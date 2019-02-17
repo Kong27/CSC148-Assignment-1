@@ -207,7 +207,7 @@ class PrepaidContract(Contract):
     def __init__(self, start: datetime.date, balance: float) -> None:
         """Create a new Prepaid Contract with the <start> date, and balance."""
         Contract.__init__(self, start)
-        self.balance = balance
+        self.balance = -balance
 
     def new_month(self, month: int, year: int, bill: Bill) -> None:
         """
@@ -216,6 +216,8 @@ class PrepaidContract(Contract):
         $25 is applied to the bill.
         """
         bill.set_rates("PREPAID", PREPAID_MINS_COST)
+        if self.start.month == month and self.start.year == year:
+            bill.add_fixed_cost(self.balance)
         self.bill = bill
         if self.balance > -10:
             self.bill.add_fixed_cost(25)
@@ -229,10 +231,10 @@ class PrepaidContract(Contract):
         with this contract.
         """
         self.start = None
-        if self.balance <= 0:
-            return self.bill.get_cost()
+        if self.balance > 0:
+            return self.balance
         else:
-            return self.balance + self.bill.get_cost()
+            return 0
 
 
 if __name__ == '__main__':
