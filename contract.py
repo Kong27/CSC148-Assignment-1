@@ -12,6 +12,7 @@ All of the files in this directory and all subdirectories are:
 Copyright (c) 2019 Bogdan Simion, Diane Horton, Jacqueline Smith
 """
 import datetime
+from math import ceil
 from typing import Optional
 from bill import Bill
 from call import Call
@@ -89,8 +90,7 @@ class Contract:
 class MTMContract(Contract):
 
     def __init__(self, start: datetime.date) -> None:
-        """ Create a new Month-to-Month Contract with the <start> date
-        """
+        """Create a new Month-to-Month Contract with the <start> date"""
         Contract.__init__(self, start)
 
     def new_month(self, month: int, year: int, bill: Bill):
@@ -99,7 +99,7 @@ class MTMContract(Contract):
         self.bill = bill
 
     def bill_call(self, call: Call) -> None:
-        self.bill.add_billed_minutes(call.duration)
+        self.bill.add_billed_minutes(ceil(call.duration / 60.0))
 
     def cancel_contract(self) -> float:
         """ Return the amount owed in order to close the phone line associated
@@ -112,8 +112,7 @@ class MTMContract(Contract):
 class TermContract(Contract):
 
     def __init__(self, start: datetime.date, end: datetime.date) -> None:
-        """ Create a new Term Contract with the <start> date, and <end> date
-        """
+        """ Create a new Term Contract with the <start> date, and <end> date."""
         Contract.__init__(self, start)
         self.end = end
 
@@ -138,14 +137,15 @@ class TermContract(Contract):
         be billed.
         """
         # free minutes left can cover all of the call
-        if self.bill.free_min <= (TERM_MINS - call.duration):
-            self.bill.add_free_minutes(call.duration)
+        if self.bill.free_min <= (TERM_MINS - (ceil(call.duration / 60.0))):
+            self.bill.add_free_minutes(ceil(call.duration / 60.0))
         # no free minutes left
         elif self.bill.free_min >= TERM_MINS:
-            self.bill.add_free_minutes(call.duration)
+            self.bill.add_free_minutes(ceil(call.duration / 60.0))
         # free minutes only cover some of the call
         else:
-            remain = call.duration - (TERM_MINS - self.bill.free_min)
+            remain = ceil(call.duration / 60.0) - (
+                    TERM_MINS - self.bill.free_min)
             self.bill.add_free_minutes(TERM_MINS - self.bill.free_min)
             self.bill.add_billed_minutes(remain)
 
@@ -160,11 +160,11 @@ class TermContract(Contract):
         else:
             return self.bill.get_cost() - TERM_DEPOSIT
 
+
 class PrepaidContract(Contract):
 
     def __init__(self, start: datetime.date, balance: float) -> None:
-        """ Create a new Term Contract with the <start> date, and balance
-        """
+        """Create a new Prepaid Contract with the <start> date, and balance."""
         Contract.__init__(self, start)
         self.balance = -balance
 
@@ -181,7 +181,7 @@ class PrepaidContract(Contract):
             self.balance -= 25
 
     def bill_call(self, call: Call) -> None:
-        self.bill.add_billed_minutes(call.duration)
+        self.bill.add_billed_minutes(ceil(call.duration / 60.0))
 
     def cancel_contract(self) -> float:
         """ Return the amount owed in order to close the phone line associated
@@ -189,9 +189,9 @@ class PrepaidContract(Contract):
         """
         self.start = None
         if self.balance <= 0:
-            return 0
+            return self.bill.get_cost()
         else:
-            return self.balance
+            return self.balance + self.bill.get_cost()
 
 
 if __name__ == '__main__':
