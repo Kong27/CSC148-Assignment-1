@@ -110,7 +110,7 @@ class CustomerFilter(Filter):
                 if int(filter_string) == customer.get_id():
                     customer_numbers = customer.get_phone_numbers()
                     for c in data:
-                        if c.dst_number not in customer_numbers or c.src_number\
+                        if c.dst_number not in customer_numbers or c.src_number \
                                 not in customer_numbers:
                             data.pop(data.index(c))
         except ValueError:
@@ -193,20 +193,15 @@ class LocationFilter(Filter):
         specified in the handout.
         """
         call_lst = []
-        location1 = []
-        location2 = []
         try:
             filter_lst = filter_string.split(',')
-            location1.append(float(filter_lst[0]))
-            location1.append(float(filter_lst[1]))
-            location1 = tuple(location1)
-            location2.append(float(filter_lst[2]))
-            location2.append(float(filter_lst[3]))
-            location2 = tuple(location2)
-            filter_location = (location1, location2)
+            btm_lft = (float(filter_lst[0]), float(filter_lst[1]))
+            top_rit = (float(filter_lst[2]), float(filter_lst[3]))
             for call in data:
-                if call.dst_loc in filter_location or call.src_loc in \
-                        filter_location:
+                if (top_rit[0] >= call.dst_loc[0] >= btm_lft[0] and top_rit[1]
+                            <= call.dst_loc[1] <= btm_lft[1]) or (top_rit[0] >=
+                            call.src_loc[0] >= btm_lft[0] and top_rit[1] <=
+                            call.src_loc[1] <= btm_lft[1]):
                     call_lst.append(data[data.index(call)])
             if call_lst is None:
                 raise ValueError
