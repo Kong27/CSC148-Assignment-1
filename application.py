@@ -118,8 +118,12 @@ def process_event_history(log: Dict[str, List[Dict]],
 
     for event_data in log['events']:
 
-        if event_data['time'].month != billing_month:
-            billing_month = event_data['time'].month
+        if datetime.datetime.strptime(event_data['time'],
+                                      "%Y-%m-%d %H:%M:%S").month != \
+                billing_month:
+            billing_month = datetime.datetime.strptime(event_data['time'],
+                                                       "%Y-%m-%d %H:%M:%S"
+                                                       ).month
             new_month(customer_list, billing_month, billing_date.year)
 
         if event_data['type'] == "call":
@@ -130,7 +134,9 @@ def process_event_history(log: Dict[str, List[Dict]],
                                                    customer_list)
 
             new_call = Call(event_data['src_number'], event_data['dst_number'],
-                            event_data['time'], event_data['duration'],
+                            datetime.datetime.strptime(event_data['time'],
+                                                       "%Y-%m-%d %H:%M:%S"),
+                            event_data['duration'],
                             event_data['src_loc'], event_data['dst_loc'])
 
             src_customer.make_call(new_call)
