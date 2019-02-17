@@ -24,6 +24,7 @@ class Filter:
 
     This is an abstract class. Only subclasses should be instantiated.
     """
+
     def __init__(self) -> None:
         pass
 
@@ -58,6 +59,7 @@ class ResetFilter(Filter):
     """
     A class for resetting all previously applied filters, if any.
     """
+
     def apply(self, customers: List[Customer],
               data: List[Call],
               filter_string: str) \
@@ -87,6 +89,7 @@ class CustomerFilter(Filter):
     """
     A class for selecting only the calls from a given customer.
     """
+
     def apply(self, customers: List[Customer],
               data: List[Call],
               filter_string: str) \
@@ -102,7 +105,16 @@ class CustomerFilter(Filter):
         - If the filter string is invalid, your code must not crash, as
         specified in the handout.
         """
-        # TODO: Implement this method
+        try:
+            for customer in customers:
+                if int(filter_string) == customer.get_id():
+                    customer_numbers = customer.get_phone_numbers()
+                    for c in data:
+                        if c.dst_number not in customer_numbers or c.src_number\
+                                not in customer_numbers:
+                            data.pop(data.index(c))
+        except ValueError:
+            return data
         return data
 
     def __str__(self) -> str:
@@ -116,6 +128,7 @@ class DurationFilter(Filter):
     A class for selecting only the calls lasting either over or under a
     specified duration.
     """
+
     def apply(self, customers: List[Customer],
               data: List[Call],
               filter_string: str) \
@@ -132,8 +145,16 @@ class DurationFilter(Filter):
         - If the filter string is invalid, your code must not crash, as
         specified in the handout.
         """
-        # TODO: Implement this method
-        return data
+        call_lst = []
+        try:
+            for call in data:
+                if int(filter_string) == call.duration:
+                    call_lst.append(data[data.index(call)])
+            if call_lst is None:
+                raise ValueError
+        except ValueError:
+            return data
+        return call_lst
 
     def __str__(self) -> str:
         """ Return a description of this filter to be displayed in the UI menu
@@ -146,6 +167,7 @@ class LocationFilter(Filter):
     """
     A class for selecting only the calls that took place within a specific area
     """
+
     def apply(self, customers: List[Customer],
               data: List[Call],
               filter_string: str) \
@@ -170,8 +192,31 @@ class LocationFilter(Filter):
         - If the filter string is invalid, your code must not crash, as
         specified in the handout.
         """
-        # TODO: Implement this method
-        return data
+        call_lst = []
+        location1 = []
+        location2 = []
+        try:
+            filter_lst = filter_string.split(',')
+            location1.append(float(filter_lst[0]))
+            location1.append(float(filter_lst[1]))
+            location1 = tuple(location1)
+            location2.append(float(filter_lst[2]))
+            location2.append(float(filter_lst[3]))
+            location2 = tuple(location2)
+            filter_location = (location1, location2)
+            for call in data:
+                if call.dst_loc in filter_location or call.src_loc in \
+                        filter_location:
+                    call_lst.append(data[data.index(call)])
+            if call_lst is None:
+                raise ValueError
+        except ValueError:
+            return data
+        except IndexError:
+            return data
+        except AttributeError:
+            return data
+        return call_lst
 
     def __str__(self) -> str:
         """ Return a description of this filter to be displayed in the UI menu
@@ -183,6 +228,7 @@ class LocationFilter(Filter):
 
 if __name__ == '__main__':
     import python_ta
+
     python_ta.check_all(config={
         'allowed-import-modules': [
             'python_ta', 'typing', 'time', 'datetime', 'call', 'customer'
