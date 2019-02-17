@@ -144,8 +144,11 @@ class TermContract(Contract):
 
     def cancel_contract(self) -> float:
         self.start = None
-        pass
-
+        now = datetime.datetime.now()
+        if now < self.end:
+            return self.bill.get_cost() + TERM_DEPOSIT
+        else:
+            return self.bill.get_cost() - TERM_DEPOSIT
 
 class PrepaidContract(Contract):
 
@@ -170,7 +173,10 @@ class PrepaidContract(Contract):
 
     def cancel_contract(self) -> float:
         self.start = None
-        return self.bill.get_cost()
+        if self.balance <= 0:
+            return 0
+        else:
+            return self.balance
 
 
 if __name__ == '__main__':
