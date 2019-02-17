@@ -48,7 +48,7 @@ class Contract:
          bill for this contract for the last month of call records loaded from
          the input dataset
     """
-    start: datetime.datetime
+    start: datetime.date
     bill: Optional[Bill]
 
     def __init__(self, start: datetime.date) -> None:
@@ -88,12 +88,17 @@ class Contract:
 
 
 class MTMContract(Contract):
+    """ A month-to-month contract for a phone line.
+
+    These contracts have no need for a deposit and can be cancelled anytime
+    without fees. Inherits the attributes from the Contract superclass.
+    """
 
     def __init__(self, start: datetime.date) -> None:
         """Create a new Month-to-Month Contract with the <start> date"""
         Contract.__init__(self, start)
 
-    def new_month(self, month: int, year: int, bill: Bill):
+    def new_month(self, month: int, year: int, bill: Bill) -> None:
         bill.set_rates("MTM", MTM_MINS_COST)
         bill.add_fixed_cost(MTM_MONTHLY_FEE)
         self.bill = bill
@@ -110,6 +115,24 @@ class MTMContract(Contract):
 
 
 class TermContract(Contract):
+    """ A term contract for a phone line
+
+    These contracts have a deposit and cancellation before the end date
+    results in the deposit being forfeited. It inherits the start and bill
+    attributes from the Contract superclass.
+
+    === Public Attributes ===
+    end:
+        End date for the term contract. It can be continued past this date, but
+        cancellation fees will apply if cancelled before.
+    current_month:
+        The current billing month.
+    current_year
+        The current billing year.
+    """
+    end: datetime.date
+    current_month: int
+    current_year: int
 
     def __init__(self, start: datetime.date, end: datetime.date) -> None:
         """ Create a new Term Contract with the <start> date, and <end> date."""
@@ -118,7 +141,7 @@ class TermContract(Contract):
         self.current_month = start.month
         self.current_year = start.year
 
-    def new_month(self, month: int, year: int, bill: Bill):
+    def new_month(self, month: int, year: int, bill: Bill) -> None:
         """
         Sets bill values according to the parameters of the term contract. If
         it is the first month of the contract, a fixed cost is added in the form
@@ -149,7 +172,7 @@ class TermContract(Contract):
         # free minutes only cover some of the call
         else:
             remain = ceil(call.duration / 60.0) - (
-                    TERM_MINS - self.bill.free_min)
+                TERM_MINS - self.bill.free_min)
             self.bill.add_free_minutes(TERM_MINS - self.bill.free_min)
             self.bill.add_billed_minutes(remain)
 
@@ -163,18 +186,30 @@ class TermContract(Contract):
         if self.current_year >= self.end.year:
             if self.current_month >= self.end.month:
                 return self.bill.get_cost() - TERM_DEPOSIT
-        else:
-            return self.bill.get_cost()
+        return self.bill.get_cost()
 
 
 class PrepaidContract(Contract):
+    """ A prepaid contract for a phone line.
+
+    Contracts do not have a monthly fee but are instead based on a given
+    balance. If the balance drops below $10 in credit, it is automatically
+    topped-up by $25. Inherits the start and bill attributes from the Contract
+    superclass.
+
+    === Public Attributes ===
+    balance:
+        The current balance on the account. Positive indicates an amount that
+        is owed. Negative indicates credit on the account.
+    """
+    balance: float
 
     def __init__(self, start: datetime.date, balance: float) -> None:
         """Create a new Prepaid Contract with the <start> date, and balance."""
         Contract.__init__(self, start)
         self.balance = -balance
 
-    def new_month(self, month: int, year: int, bill: Bill):
+    def new_month(self, month: int, year: int, bill: Bill) -> None:
         """
         Balances carried over between months via attribute. If there is less
         than a $10 credit (more than negative 10), then an automatic top-up of
@@ -204,7 +239,7 @@ if __name__ == '__main__':
     import python_ta
     python_ta.check_all(config={
         'allowed-import-modules': [
-            'python_ta', 'typing', 'datetime', 'bill', 'call'
+            'python_ta', 'typing', 'datetime', 'bill', 'call', 'math'
         ],
         'disable': ['R0902', 'R0913'],
         'generated-members': 'pygame.*'
