@@ -207,7 +207,7 @@ class PrepaidContract(Contract):
     def __init__(self, start: datetime.date, balance: float) -> None:
         """Create a new Prepaid Contract with the <start> date, and balance."""
         Contract.__init__(self, start)
-        self.balance = -balance
+        self.balance = balance
 
     def new_month(self, month: int, year: int, bill: Bill) -> None:
         """
