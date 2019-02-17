@@ -89,6 +89,8 @@ class Contract:
 class MTMContract(Contract):
 
     def __init__(self, start: datetime.date) -> None:
+        """ Create a new Month-to-Month Contract with the <start> date
+        """
         Contract.__init__(self, start)
 
     def new_month(self, month: int, year: int, bill: Bill):
@@ -100,6 +102,9 @@ class MTMContract(Contract):
         self.bill.add_billed_minutes(call.duration)
 
     def cancel_contract(self) -> float:
+        """ Return the amount owed in order to close the phone line associated
+        with this contract.
+        """
         self.start = None
         return self.bill.get_cost()
 
@@ -107,6 +112,8 @@ class MTMContract(Contract):
 class TermContract(Contract):
 
     def __init__(self, start: datetime.date, end: datetime.date) -> None:
+        """ Create a new Term Contract with the <start> date, and <end> date
+        """
         Contract.__init__(self, start)
         self.end = end
 
@@ -143,6 +150,9 @@ class TermContract(Contract):
             self.bill.add_billed_minutes(remain)
 
     def cancel_contract(self) -> float:
+        """ Return the amount owed in order to close the phone line associated
+        with this contract.
+        """
         self.start = None
         now = datetime.datetime.now()
         if now < self.end:
@@ -153,6 +163,8 @@ class TermContract(Contract):
 class PrepaidContract(Contract):
 
     def __init__(self, start: datetime.date, balance: float) -> None:
+        """ Create a new Term Contract with the <start> date, and balance
+        """
         Contract.__init__(self, start)
         self.balance = -balance
 
@@ -172,6 +184,9 @@ class PrepaidContract(Contract):
         self.bill.add_billed_minutes(call.duration)
 
     def cancel_contract(self) -> float:
+        """ Return the amount owed in order to close the phone line associated
+        with this contract.
+        """
         self.start = None
         if self.balance <= 0:
             return 0
