@@ -188,7 +188,7 @@ class TermContract(Contract):
         """
         self.start = None
         if self.current_year >= self.end.year:
-            if self.current_month >= self.end.month:
+            if self.current_month > self.end.month:
                 return self.bill.get_cost() - TERM_DEPOSIT
         return self.bill.get_cost()
 
