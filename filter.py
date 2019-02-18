@@ -109,18 +109,20 @@ class CustomerFilter(Filter):
         try:
             for customer in customers:
                 if int(filter_string) == customer.get_id():
-                    customer_history = customer.get_history()
+                    customer_numbers = customer.get_phone_numbers()
                     for c in data:
-                        if c.dst_number in customer_history or c.src_number \
-                                in customer_history:
+                        if c.dst_number in customer_numbers or c.src_number \
+                                in customer_numbers:
                             call_lst.append(c)
+            if call_lst is None:
+                return data
+            return call_lst
         except ValueError:
             return data
         except AttributeError:
             return data
         except TypeError:
             return data
-        return call_lst
 
     def __str__(self) -> str:
         """ Return a description of this filter to be displayed in the UI menu
@@ -221,7 +223,7 @@ class LocationFilter(Filter):
                                                           top_rit[1] >=
                                                           call.src_loc[1] >=
                                                           btm_lft[1]):
-                    call_lst.append(data[data.index(call)])
+                    call_lst.append(call)
             if call_lst is None:
                 raise ValueError
         except ValueError:
