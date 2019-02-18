@@ -101,6 +101,7 @@ class MTMContract(Contract):
     def new_month(self, month: int, year: int, bill: Bill) -> None:
         bill.set_rates("MTM", MTM_MINS_COST)
         bill.add_fixed_cost(MTM_MONTHLY_FEE)
+
         self.bill = bill
 
     def bill_call(self, call: Call) -> None:
@@ -147,12 +148,15 @@ class TermContract(Contract):
         it is the first month of the contract, a fixed cost is added in the form
         of the term deposit.
         """
-        bill.set_rates("TERM", TERM_MINS_COST)
-        bill.add_fixed_cost(TERM_MONTHLY_FEE)
+        self.bill = bill
+
+        self.bill.set_rates("TERM", TERM_MINS_COST)
+        self.bill.add_fixed_cost(TERM_MONTHLY_FEE)
+
         # if a given month and year matches the start then it is the 1st month
         if month == self.start.month and year == self.start.year:
-            bill.add_fixed_cost(TERM_DEPOSIT)
-        self.bill = bill
+            self.bill.add_fixed_cost(TERM_DEPOSIT)
+
         self.current_month = month
         self.current_year = year
 
@@ -168,7 +172,7 @@ class TermContract(Contract):
             self.bill.add_free_minutes(ceil(call.duration / 60.0))
         # no free minutes left
         elif self.bill.free_min >= TERM_MINS:
-            self.bill.add_free_minutes(ceil(call.duration / 60.0))
+            self.bill.add_billed_minutes(ceil(call.duration / 60.0))
         # free minutes only cover some of the call
         else:
             remain = ceil(call.duration / 60.0) - (
@@ -201,13 +205,21 @@ class PrepaidContract(Contract):
     balance:
         The current balance on the account. Positive indicates an amount that
         is owed. Negative indicates credit on the account.
+
+    === Private Attributes ===
+    _first_bill:
+        Boolean indicator of whether the bill is being put in for the first
+        time. If so then add the prepaid balance as credit to the fixed cost of
+        the first bill.
     """
     balance: float
+    _first_bill: bool
 
     def __init__(self, start: datetime.date, balance: float) -> None:
         """Create a new Prepaid Contract with the <start> date, and balance."""
         Contract.__init__(self, start)
         self.balance = -balance
+        self._first_bill = True
 
     def new_month(self, month: int, year: int, bill: Bill) -> None:
         """
@@ -216,12 +228,20 @@ class PrepaidContract(Contract):
         $25 is applied to the bill.
         """
         bill.set_rates("PREPAID", PREPAID_MINS_COST)
-        if self.start.month == month and self.start.year == year:
+
+        # adds a negative credit since balance is initially negative
+        if self._first_bill is True:
             bill.add_fixed_cost(self.balance)
+            self._first_bill = False
+
+        # decrease credit by the amount spent on the old bill
+        if self.bill is not None:
+            self.balance = self.bill.get_cost()
+            if self.balance > -10:
+                self.balance = self.balance - 25
+            bill.add_fixed_cost(self.balance)
+
         self.bill = bill
-        if self.balance > -10:
-            self.bill.add_fixed_cost(25)
-            self.balance -= 25
 
     def bill_call(self, call: Call) -> None:
         self.bill.add_billed_minutes(ceil(call.duration / 60.0))

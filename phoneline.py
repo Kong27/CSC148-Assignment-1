@@ -58,7 +58,7 @@ class PhoneLine:
         """
         if (month, year) not in self.bills:
             self.bills[(month, year)] = Bill()
-        self.contract.new_month(month, year, self.bills[(month, year)])
+            self.contract.new_month(month, year, self.bills[(month, year)])
 
     def make_call(self, call: Call) -> None:
         """ Add the <call> to this phone line's callhistory, and bill it

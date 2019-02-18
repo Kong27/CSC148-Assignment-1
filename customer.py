@@ -64,7 +64,7 @@ class Customer:
         """
         for line in self._phone_lines:
             if call.dst_number == line.number:
-                line.make_call(call)
+                line.receive_call(call)
 
     def cancel_phone_line(self, number: str) -> Union[float, None]:
         """ Remove PhoneLine with number <number> from this customer and return

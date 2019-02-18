@@ -121,6 +121,7 @@ def process_event_history(log: Dict[str, List[Dict]],
         if datetime.datetime.strptime(event_data['time'],
                                       "%Y-%m-%d %H:%M:%S").month != \
                 billing_month:
+
             billing_month = datetime.datetime.strptime(event_data['time'],
                                                        "%Y-%m-%d %H:%M:%S"
                                                        ).month
