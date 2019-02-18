@@ -124,7 +124,11 @@ def process_event_history(log: Dict[str, List[Dict]],
             billing_month = datetime.datetime.strptime(event_data['time'],
                                                        "%Y-%m-%d %H:%M:%S"
                                                        ).month
-            new_month(customer_list, billing_month, billing_date.year)
+            new_month(customer_list, billing_month,\
+                      datetime.datetime.strptime(event_data['time'],
+                                                 "%Y-%m-%d %H:%M:%S"
+                                                 ).year
+                      )
 
         if event_data['type'] == "call":
             src_customer = find_customer_by_number(event_data['src_number'],
