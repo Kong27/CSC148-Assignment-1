@@ -39,7 +39,7 @@ class Filter:
         after selecting this filter.
         The <customers> is a list of all customers from the input dataset.
 
-         If the filter has
+        If the filter has
         no effect or the <filter_string> is invalid then return the same calls
         from the <data> input.
 
@@ -107,24 +107,23 @@ class CustomerFilter(Filter):
         """
         call_lst = []
         try:
-            for customer in customers:
-                if int(filter_string) == customer.get_id():
-                    customer_numbers = customer.get_history()
-                    for c in data:
-                        if c.dst_number in customer_numbers[0] or c.dst_number \
-                                in customer_numbers[1] or c.src_number in \
-                                customer_numbers[0] or c.src_number in \
-                                customer_numbers[1]:
-                            call_lst.append(c)
-            if call_lst is None:
+            for c in customers:
+                customer_history = c.get_history()
+                for call in customer_history[0]:
+                    if call in data and int(filter_string) == c.get_id():
+                        call_lst.append(call)
+            # empty call list means input did not match a valid customer
+            if len(call_lst) == 0:
                 return data
+            else:
+                return call_lst
+
         except ValueError:
             return data
         except AttributeError:
             return data
         except TypeError:
             return data
-        return call_lst
 
     def __str__(self) -> str:
         """ Return a description of this filter to be displayed in the UI menu
@@ -156,25 +155,28 @@ class DurationFilter(Filter):
         """
         call_lst = []
         try:
+
             if filter_string[0] == 'L':
+                secs = int(filter_string[1:])
                 for call in data:
-                    if int(filter_string[1:]) < call.duration:
+                    if call.duration < secs:
                         call_lst.append(call)
             elif filter_string[0] == 'G':
+                secs = int(filter_string[1:])
                 for call in data:
-                    if int(filter_string[1:]) > call.duration:
+                    if call.duration > secs:
                         call_lst.append(call)
             else:
                 return data
-            if call_lst is None:
-                raise ValueError
+
+            return call_lst
+
         except ValueError:
             return data
         except IndexError:
             return data
         except AttributeError:
             return data
-        return call_lst
 
     def __str__(self) -> str:
         """ Return a description of this filter to be displayed in the UI menu
@@ -219,13 +221,13 @@ class LocationFilter(Filter):
             top_rit = (float(filter_lst[2]), float(filter_lst[3]))
             for call in data:
                 if (top_rit[0] >= call.dst_loc[0] >= btm_lft[0] and top_rit[1]
-                    >= call.dst_loc[1] >= btm_lft[1]) or (top_rit[0] >=
-                                                          call.src_loc[0] >=
-                                                          btm_lft[0] and
-                                                          top_rit[1] >=
-                                                          call.src_loc[1] >=
-                                                          btm_lft[1]):
-                    call_lst.append(call)
+                        >= call.dst_loc[1] >= btm_lft[1]) or (top_rit[0] >=
+                                                              call.src_loc[0] >=
+                                                              btm_lft[0] and
+                                                              top_rit[1] >=
+                                                              call.src_loc[1] >=
+                                                              btm_lft[1]):
+                    call_lst.append(data[data.index(call)])
             if call_lst is None:
                 raise ValueError
         except ValueError:
