@@ -105,17 +105,22 @@ class CustomerFilter(Filter):
         - If the filter string is invalid, your code must not crash, as
         specified in the handout.
         """
+        call_lst = []
         try:
             for customer in customers:
                 if int(filter_string) == customer.get_id():
-                    customer_numbers = customer.get_phone_numbers()
+                    customer_history = customer.get_history()
                     for c in data:
-                        if c.dst_number not in customer_numbers or c.src_number \
-                                not in customer_numbers:
-                            data.pop(data.index(c))
+                        if c.dst_number in customer_history or c.src_number \
+                                in customer_history:
+                            call_lst.append(c)
         except ValueError:
             return data
-        return data
+        except AttributeError:
+            return data
+        except TypeError:
+            return data
+        return call_lst
 
     def __str__(self) -> str:
         """ Return a description of this filter to be displayed in the UI menu
@@ -145,16 +150,16 @@ class DurationFilter(Filter):
         - If the filter string is invalid, your code must not crash, as
         specified in the handout.
         """
-                call_lst = []
+        call_lst = []
         try:
             if filter_string[0] == 'L':
                 for call in data:
                     if int(filter_string[1:]) < call.duration:
-                        call_lst.append(data[data.index(call)])
+                        call_lst.append(call)
             elif filter_string[0] == 'G':
                 for call in data:
                     if int(filter_string[1:]) > call.duration:
-                        call_lst.append(data[data.index(call)])
+                        call_lst.append(call)
             else:
                 return data
             if call_lst is None:
@@ -210,9 +215,12 @@ class LocationFilter(Filter):
             top_rit = (float(filter_lst[2]), float(filter_lst[3]))
             for call in data:
                 if (top_rit[0] >= call.dst_loc[0] >= btm_lft[0] and top_rit[1]
-                            <= call.dst_loc[1] <= btm_lft[1]) or (top_rit[0] >=
-                            call.src_loc[0] >= btm_lft[0] and top_rit[1] <=
-                            call.src_loc[1] <= btm_lft[1]):
+                    >= call.dst_loc[1] >= btm_lft[1]) or (top_rit[0] >=
+                                                          call.src_loc[0] >=
+                                                          btm_lft[0] and
+                                                          top_rit[1] >=
+                                                          call.src_loc[1] >=
+                                                          btm_lft[1]):
                     call_lst.append(data[data.index(call)])
             if call_lst is None:
                 raise ValueError
@@ -221,6 +229,8 @@ class LocationFilter(Filter):
         except IndexError:
             return data
         except AttributeError:
+            return data
+        except TypeError:
             return data
         return call_lst
 
