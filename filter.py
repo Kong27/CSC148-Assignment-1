@@ -109,20 +109,22 @@ class CustomerFilter(Filter):
         try:
             for customer in customers:
                 if int(filter_string) == customer.get_id():
-                    customer_numbers = customer.get_phone_numbers()
+                    customer_numbers = customer.get_history()
                     for c in data:
-                        if c.dst_number in customer_numbers or c.src_number \
-                                in customer_numbers:
+                        if c.dst_number in customer_numbers[0] or c.dst_number \
+                                in customer_numbers[1] or c.src_number in \
+                                customer_numbers[0] or c.src_number in \
+                                customer_numbers[1]:
                             call_lst.append(c)
             if call_lst is None:
                 return data
-            return call_lst
         except ValueError:
             return data
         except AttributeError:
             return data
         except TypeError:
             return data
+        return call_lst
 
     def __str__(self) -> str:
         """ Return a description of this filter to be displayed in the UI menu
